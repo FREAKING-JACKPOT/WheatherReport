@@ -70,8 +70,8 @@ def current_wheather(city_id, chat_id):
     request = requests.get("http://api.openweathermap.org/data/2.5/weather",
                            params={'id': city_id, 'units': 'metric', 'appid': appid, 'lang': 'ru'})
     data = request.json()
-    bot.send_message(chat_id, 'погода: {0} \nтемпература: {1:.0f} °C \nминимальная температура: {2:.0f} °C \nмаксимальная температура: {3: .0f} °C\nскорость ветра: {4} м/c\nдавление: {5} гПа'.format(
-        data['weather'][0]['description'], data['main']['temp'], data['main']['temp_min'], data['main']['temp_max'], data['wind']['speed'], data['main']['pressure']))
+    bot.send_message(chat_id, 'Населенный пункт: {6}, {7}\nпогода: {0} \nтемпература: {1:.0f} °C \nминимальная температура: {2:.0f} °C \nмаксимальная температура: {3: .0f} °C\nскорость ветра: {4} м/c\nдавление: {5} гПа'.format(
+        data['weather'][0]['description'], data['main']['temp'], data['main']['temp_min'], data['main']['temp_max'], data['wind']['speed'], data['main']['pressure'],data['name'],data['sys']['country']))
     bot.send_message(chat_id, 'Введите название населенного пункта.',
                      reply_markup=types.ReplyKeyboardRemove(selective=False))
 
@@ -94,3 +94,4 @@ def five_day_weather_forecast(city_id, chat_id):
 
 
 bot.polling()
+

@@ -22,9 +22,8 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def search(message):
     """Принимает названия города, выводит список существующих городов, переходит к выбору города из списка"""
-    city = message.text
     data = weather.search_cities(message.text)
-    try:
+    if data['cod'] != '400' and data['count'] != 0:
         msg = []
         for city in enumerate(data['list']):
             msg.append('{}) {}, {}'.format(city[0] + 1, city[1]['name'],
@@ -36,7 +35,7 @@ def search(message):
             reply_markup=keyboard.cities_list_keyboard_maker(len(
                 data['list'])))
         bot.register_next_step_handler(msg, city_request_check, data)
-    except Exception:
+    else:
         bot.send_message(
             message.chat.id,
             'Я не знаю такого города. Пожалуйста введите город повторно.')

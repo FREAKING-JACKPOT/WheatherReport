@@ -1,6 +1,6 @@
 .vscode/*
-__pychache__/*
+__pycache__/*
 myvenv/*
 config.py
 database.db
-sqlbd.py
+sqldb.py

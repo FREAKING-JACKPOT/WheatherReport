@@ -15,8 +15,8 @@ def start_message(message):
     bot.send_message(
         message.chat.id,
         'Привет,{}. Чтобы получить информацию о погоде'.format(
-            message.from_user.first_name)
-    ) + ', введи название населенного пункта в чат :)'
+            message.from_user.first_name) +
+        ', введи название населенного пункта в чат :)')
 
 
 @bot.message_handler(content_types=['text'])

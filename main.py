@@ -5,20 +5,25 @@ import keyboards
 from telebot import types
 
 bot = telebot.TeleBot(config.bot_token)
+weather = WeatherTools.WeatherTools(config.appid, bot)
+keyboard = keyboards.KeyboardBuilder()
 
 
 @bot.message_handler(commands=['start', 'help'])
 def start_message(message):
+    """Принимает команды help и start и отправляет информацию о боте"""
     bot.send_message(
         message.chat.id,
-        'Привет,{}. Чтобы получить информацию о погоде, введи название населенного пункта в чат :)'
-        .format(message.from_user.first_name))
+        'Привет,{}. Чтобы получить информацию о погоде'.format(
+            message.from_user.first_name)
+    ) + ', введи название населенного пункта в чат :)'
 
 
 @bot.message_handler(content_types=['text'])
 def search(message):
+    """Принимает названия города, выводит список существующих городов, переходит к выбору города из списка"""
     city = message.text
-    data = WeatherTools.search_cities(message.text)
+    data = weather.search_cities(message.text)
     try:
         msg = []
         for city in enumerate(data['list']):
@@ -27,8 +32,8 @@ def search(message):
         bot.send_message(message.chat.id, '\n'.join(msg))
         msg = bot.send_message(
             message.chat.id,
-            'Введите номер населенного пункта',
-            reply_markup=keyboards.cities_list_keyboard_maker(len(
+            'Выберите номер населенного пункта изсписка.',
+            reply_markup=keyboard.cities_list_keyboard_maker(len(
                 data['list'])))
         bot.register_next_step_handler(msg, city_request_check, data)
     except Exception:
@@ -38,12 +43,13 @@ def search(message):
 
 
 def city_request_check(message, data):
+    """Проверяет на правильость выбора города из списка и переходит к выбору функции """
     if message.text.isdigit() and int(message.text) <= len(
             data['list']) and int(message.text) != 0:
         city_id = data['list'][int(message.text) - 1]['id']
         msg = bot.send_message(message.chat.id,
                                'Выберите функцию:',
-                               reply_markup=keyboards.mode_keyboard_maker())
+                               reply_markup=keyboard.mode_keyboard_maker())
         bot.register_next_step_handler(msg, user_request, city_id)
     else:
         msg = bot.send_message(
@@ -53,10 +59,11 @@ def city_request_check(message, data):
 
 
 def user_request(message, city_id):
+    """Проверяет на существование функции и запускает функцию """
     if (message.text == 'Текущая погода'):
-        WeatherTools.current_wheather(bot, city_id, message.chat.id)
+        weather.current_wheather(city_id, message.chat.id)
     elif (message.text == 'Погода на 5 дней'):
-        WeatherTools.five_day_weather_forecast(bot, city_id, message.chat.id)
+        weather.five_day_weather_forecast(city_id, message.chat.id)
     else:
         msg = bot.send_message(
             message.chat.id,

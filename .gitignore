@@ -2,5 +2,3 @@
 __pycache__/*
 myvenv/*
 config.py
-database.db
-sqldb.py

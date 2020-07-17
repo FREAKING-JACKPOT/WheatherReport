@@ -6,10 +6,11 @@ url_base = "http://api.openweathermap.org/data/2.5/"
 
 
 class WeatherTools:
-    def __init__(self, appid, bot):
+    def __init__(self, appid, bot, keyboard):
         """Получаем appid и бота"""
         self.appid = appid
         self.bot = bot
+        self.keyboard = keyboard
 
     def search_cities(self, city):
         """Получаем список городов"""
@@ -21,7 +22,7 @@ class WeatherTools:
                                })
         return request.json()
 
-    def current_wheather(self, city_id, chat_id):
+    def current_wheather(self, city_id, chat_id, type='request'):
         """Получаем информацию об определенном городе и отправляем пользователю ввиде сообщения"""
         request = requests.get(url_base + "weather",
                                params={
@@ -40,10 +41,11 @@ class WeatherTools:
                 data['main']['temp_max']) +
             'скорость ветра: {} м/c\nдавление: {} гПа'.format(
                 data['wind']['speed'], data['main']['pressure']))
-        self.bot.send_message(
-            chat_id,
-            'Введите название населенного пункта.',
-            reply_markup=types.ReplyKeyboardRemove(selective=False))
+        if (type == 'request'):
+            self.bot.send_message(
+                chat_id,
+                'Введите название населенного пункта.',
+                reply_markup=types.ReplyKeyboardRemove(selective=False))
 
     def five_day_weather_forecast(self, city_id, chat_id):
         """Получаем погоду на 5 дней и отправляем её пользователю ввиде сообщения"""
@@ -70,3 +72,17 @@ class WeatherTools:
             chat_id,
             'Введите название населенного пункта.',
             reply_markup=types.ReplyKeyboardRemove(selective=False))
+
+    def list_maker(self, data, chat_id):
+        """Создает лист с городами """
+        msg = []
+        for city in enumerate(data['list']):
+            msg.append('{}) {}, {}'.format(city[0] + 1, city[1]['name'],
+                                           city[1]['sys']['country']))
+        self.bot.send_message(chat_id, '\n'.join(msg))
+        msg = self.bot.send_message(
+            chat_id,
+            'Выберите номер населенного пункта из списка.',
+            reply_markup=self.keyboard.cities_list_keyboard_maker(
+                len(data['list'])))
+        return msg
